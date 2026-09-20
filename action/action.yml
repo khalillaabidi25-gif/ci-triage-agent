@@ -1,0 +1,63 @@
+# CI Failure Triage Agent — reusable composite GitHub Action.
+#
+# When a workflow run fails, this action:
+#   1. downloads the failed job's logs       (GitHub REST API)
+#   2. summarizes the likely root cause       (Anthropic Claude)
+#   3. posts the summary as a PR comment      (GitHub REST API)
+#
+# Callers must satisfy the trigger + permissions shown in
+# .github/workflows/ci-failure-triage.yml (example) — this action itself
+# uses ${{ github.token }} which inherits the caller's permissions.
+
+name: "CI Failure Triage Agent"
+description: >
+  Triage a failed GitHub Actions run: fetch failed-job logs, diagnose the
+  root cause with Claude, and post the analysis as a PR comment.
+inputs:
+  run-id:
+    description: >
+      Workflow run ID to triage. For a workflow_run trigger, use
+      ${{ github.event.workflow_run.id }}. If omitted, the current run's
+      GITHUB_RUN_ID is used.
+    required: false
+    default: ""
+  anthropic-api-key:
+    description: >
+      Anthropic API key. Pass it from secrets, e.g.
+      anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}. Never commit it.
+    required: true
+  claude-model:
+    description: Anthropic model to use for the diagnosis.
+    required: false
+    default: "claude-sonnet-4-20250514"
+  max-log-chars:
+    description: Maximum characters of the log sent to the model.
+    required: false
+    default: "50000"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Install dependencies
+      shell: bash
+      run: npm ci
+
+    - name: Build
+      shell: bash
+      run: npm run build
+
+    - name: Triage failed run
+      id: triage
+      shell: bash
+      run: node dist/index.js "${{ inputs.run-id }}"
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+        CLAUDE_MODEL: ${{ inputs.claude-model }}
+        MAX_LOG_CHARS: ${{ inputs.max-log-chars }}

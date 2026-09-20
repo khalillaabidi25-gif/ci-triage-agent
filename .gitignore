@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Build output (the action builds it fresh via npm run build)
+dist/
+
+# Secrets — never commit env files or keys
+.env
+.env.*
+*.pem
+*.key
+
+# Editor / OS
+.vscode/
+.idea/
+Thumbs.db

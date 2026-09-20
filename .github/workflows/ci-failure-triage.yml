@@ -1,0 +1,37 @@
+# Example: run the triage agent whenever a workflow named "CI" finishes.
+#
+# Requirements:
+#   - The trigger workflow ('CI' below) must exist in this repository.
+#   - Repo secrets → Settings → Secrets and variables → Actions:
+#       ANTHROPIC_API_KEY  (required)
+#   - `permissions:` below grant github.token just enough access:
+#       actions: read          → fetch run/job/logs
+#       pull-requests: write   → post the triage comment on the PR
+#   - Important: the default GITHUB_TOKEN *cannot* comment on PRs coming
+#     from forks (trusted fork authors must use their own key). For this
+#     learning setup, PRs from same-repo branches work out of the box.
+
+name: Triage Failed CI
+
+on:
+  workflow_run:
+    workflows: ["CI"]        # ← name of the pipeline you want to watch
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: read
+  pull-requests: write
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run failure triage
+        uses: ./action
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
