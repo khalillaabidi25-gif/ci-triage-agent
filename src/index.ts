@@ -142,9 +142,9 @@ async function main(): Promise<void> {
   const logs = await decodeLogBody(await res.arrayBuffer());
   console.log(`\nFetched ${logs.length} chars of logs from ${failed.name}.`);
 
-  // ── Stage 2: send the log to Claude for a root-cause diagnosis ──
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.error("Missing ANTHROPIC_API_KEY. Set it to run the Stage 2 analysis.");
+  // ── Stage 2: send the log to the LLM (Groq) for a root-cause diagnosis ──
+  if (!process.env.GROQ_API_KEY) {
+    console.error("Missing GROQ_API_KEY. Set it to run the Stage 2 analysis.");
     process.exit(1);
   }
 

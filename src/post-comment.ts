@@ -2,7 +2,7 @@
  * Stage 3 — Post the triage summary as a PR comment.
  *
  * A workflow run was triggered by a pull request (or a push). We find the
- * PR that triggered the run, then post Claude's analysis on it.
+ * PR that triggered the run, then post the LLM's analysis on it.
  *
  * API notes:
  *  - Runs link to PRs via GET /repos/{owner}/{repo}/actions/runs/{id}/pull_requests

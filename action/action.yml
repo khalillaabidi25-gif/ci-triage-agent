@@ -2,7 +2,7 @@
 #
 # When a workflow run fails, this action:
 #   1. downloads the failed job's logs       (GitHub REST API)
-#   2. summarizes the likely root cause       (Anthropic Claude)
+#   2. summarizes the likely root cause       (Groq / Llama)
 #   3. posts the summary as a PR comment      (GitHub REST API)
 #
 # Callers must satisfy the trigger + permissions shown in
@@ -12,7 +12,7 @@
 name: "CI Failure Triage Agent"
 description: >
   Triage a failed GitHub Actions run: fetch failed-job logs, diagnose the
-  root cause with Claude, and post the analysis as a PR comment.
+  root cause with an LLM, and post the analysis as a PR comment.
 inputs:
   run-id:
     description: >
@@ -21,15 +21,15 @@ inputs:
       GITHUB_RUN_ID is used.
     required: false
     default: ""
-  anthropic-api-key:
+  groq-api-key:
     description: >
-      Anthropic API key. Pass it from secrets, e.g.
-      anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}. Never commit it.
+      Groq API key (free tier at console.groq.com). Pass it from secrets, e.g.
+      groq-api-key: ${{ secrets.GROQ_API_KEY }}. Never commit it.
     required: true
-  claude-model:
-    description: Anthropic model to use for the diagnosis.
+  model:
+    description: Groq model to use for the diagnosis.
     required: false
-    default: "claude-sonnet-4-20250514"
+    default: "llama-3.3-70b-versatile"
   max-log-chars:
     description: Maximum characters of the log sent to the model.
     required: false
@@ -58,6 +58,6 @@ runs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
         GITHUB_REPOSITORY: ${{ github.repository }}
-        ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
-        CLAUDE_MODEL: ${{ inputs.claude-model }}
+        GROQ_API_KEY: ${{ inputs.groq-api-key }}
+        MODEL: ${{ inputs.model }}
         MAX_LOG_CHARS: ${{ inputs.max-log-chars }}

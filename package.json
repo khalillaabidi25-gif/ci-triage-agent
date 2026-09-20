@@ -2,15 +2,15 @@
   "name": "ci-triage-agent",
   "version": "0.1.0",
   "private": true,
-  "description": "Fetches failed GitHub Actions logs, summarizes the root cause with Claude, and posts it as a PR comment.",
+  "description": "Fetches failed GitHub Actions logs, summarizes the root cause with Groq/Llama, and posts it as a PR comment.",
   "type": "module",
   "scripts": {
     "start": "tsx src/index.ts",
     "build": "tsc"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.123.0",
     "@octokit/rest": "^21.1.1",
+    "openai": "^4.104.0",
     "unzipper": "^0.12.3"
   },
   "devDependencies": {

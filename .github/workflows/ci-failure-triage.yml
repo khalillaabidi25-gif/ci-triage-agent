@@ -3,7 +3,7 @@
 # Requirements:
 #   - The trigger workflow ('CI' below) must exist in this repository.
 #   - Repo secrets → Settings → Secrets and variables → Actions:
-#       ANTHROPIC_API_KEY  (required)
+#       GROQ_API_KEY  (required)
 #   - `permissions:` below grant github.token just enough access:
 #       actions: read          → fetch run/job/logs
 #       pull-requests: write   → post the triage comment on the PR
@@ -34,4 +34,4 @@ jobs:
         uses: ./action
         with:
           run-id: ${{ github.event.workflow_run.id }}
-          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+          groq-api-key: ${{ secrets.GROQ_API_KEY }}
