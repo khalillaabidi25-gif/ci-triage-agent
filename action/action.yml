@@ -20,15 +20,15 @@ description: >
 inputs:
   run-id:
     description: >
-      Workflow run ID to triage. For a workflow_run trigger, the caller passes
-      ${{ github.event.workflow_run.id }} (valid THERE, not here). If omitted,
-      the current run's GITHUB_RUN_ID is used.
+      Workflow run ID to triage. For a workflow_run trigger, the caller
+      passes the failed run's ID from the github event context in its own
+      workflow. If omitted, the current run's GITHUB_RUN_ID is used.
     required: false
     default: ""
   groq-api-key:
     description: >
-      Groq API key. The caller passes it from its own secrets, e.g.
-      groq-api-key: ${{ secrets.GROQ_API_KEY }}. Never commit it.
+      Groq API key to use for the diagnosis. The caller passes it from its
+      own secrets registry. Never hardcode or commit the key.
     required: true
   model:
     description: Groq model to use for the diagnosis.
