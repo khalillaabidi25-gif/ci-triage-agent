@@ -5,30 +5,27 @@
  * PR that triggered the run, then post the LLM's analysis on it.
  *
  * API notes:
- *  - Runs link to PRs via GET /repos/{owner}/{repo}/actions/runs/{id}/pull_requests
+ *  - The "Get a workflow run" response already embeds the run's associated
+ *    pull requests in `run.pull_requests` — we read the PR number from there.
+ *    (The dedicated endpoint GET .../runs/{id}/pull_requests currently
+ *    responds 404 even with full-scope tokens, so we deliberately avoid it.)
  *  - Comments on a PR go through the *issues* endpoints (a PR *is* an issue
  *    on GitHub's API) → POST /repos/{owner}/{repo}/issues/{n}/comments
  */
 
 import { Octokit } from "@octokit/rest";
 
+/** Structural subset of the workflow-run payload we need to find the PR. */
+export interface RunWithPullRequests {
+  pull_requests?: { number: number }[] | null;
+}
+
 /**
  * Returns the PR number that triggered a run, or null if the run wasn't
  * caused by a pull request (e.g. a push to main).
  */
-export async function findAssociatedPr(
-  octokit: Octokit,
-  owner: string,
-  repo: string,
-  runId: number,
-): Promise<number | null> {
-  // octokit.rest doesn't always expose this endpoint (it varies by SDK version),
-  // so call the REST route directly — path is stable across GitHub API versions.
-  const { data } = await octokit.request(
-    "GET /repos/{owner}/{repo}/actions/runs/{run_id}/pull_requests",
-    { owner, repo, run_id: runId },
-  );
-  return data[0]?.number ?? null;
+export function findAssociatedPr(run: RunWithPullRequests): number | null {
+  return run.pull_requests?.[0]?.number ?? null;
 }
 
 /** Posts the summary as a comment, with a header to keep it visually distinct. */

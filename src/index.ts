@@ -152,7 +152,9 @@ async function main(): Promise<void> {
   const summary = await summarizeFailure(logs);
 
   // ── Stage 3: publish the diagnosis on the PR that triggered the run ──
-  const prNumber = await findAssociatedPr(octokit, ctx.owner, ctx.repo, runId);
+  // The PR number comes from the workflow-run payload itself (run.pull_requests);
+  // the dedicated "runs/{id}/pull_requests" endpoint is currently broken (404).
+  const prNumber = findAssociatedPr(run);
   if (prNumber === null) {
     console.log("\nRun was not triggered by a PR (or no PR associated) — skipping comment.\n");
     console.log(summary);
