@@ -33,7 +33,7 @@ inputs:
   model:
     description: Groq model to use for the diagnosis.
     required: false
-    default: "llama-3.3-70b-versatile"
+    default: "openai/gpt-oss-20b"
   max-log-chars:
     description: Maximum characters of the log sent to the model.
     required: false

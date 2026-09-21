@@ -26,7 +26,7 @@ function getClient(): OpenAI {
 
 // Model + payload size are env-configurable so the GitHub Action can pass
 // them as inputs without us rebuilding.
-const MODEL = process.env.MODEL ?? "llama-3.3-70b-versatile";
+const MODEL = process.env.MODEL ?? "openai/gpt-oss-20b";
 const MAX_LOG_CHARS = Math.max(1, Number(process.env.MAX_LOG_CHARS ?? 50000));
 
 const SYSTEM_PROMPT = `You are "CI Failure Triage", a senior DevOps engineer SRE.
