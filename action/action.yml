@@ -5,9 +5,13 @@
 #   2. summarizes the likely root cause       (Groq / Llama)
 #   3. posts the summary as a PR comment      (GitHub REST API)
 #
-# Callers must satisfy the trigger + permissions shown in
-# .github/workflows/ci-failure-triage.yml (example) — this action itself
-# uses ${{ github.token }} which inherits the caller's permissions.
+# Portability rule: composite actions CANNOT read github.* or secrets.*
+# directly (error: "Unrecognized named-value: 'github'/'secrets'"), so
+# EVERYTHING enters this action via `inputs:` (config) or step-level `env:`
+# supplied by the caller. The caller is responsible for passing them — see
+# .github/workflows/ci-failure-triage.yml. Required env from the caller step:
+#   GITHUB_TOKEN       <- ${{ github.token }}
+#   GITHUB_REPOSITORY  <- ${{ github.repository }}
 
 name: "CI Failure Triage Agent"
 description: >
@@ -16,14 +20,14 @@ description: >
 inputs:
   run-id:
     description: >
-      Workflow run ID to triage. For a workflow_run trigger, use
-      ${{ github.event.workflow_run.id }}. If omitted, the current run's
-      GITHUB_RUN_ID is used.
+      Workflow run ID to triage. For a workflow_run trigger, the caller passes
+      ${{ github.event.workflow_run.id }} (valid THERE, not here). If omitted,
+      the current run's GITHUB_RUN_ID is used.
     required: false
     default: ""
   groq-api-key:
     description: >
-      Groq API key (free tier at console.groq.com). Pass it from secrets, e.g.
+      Groq API key. The caller passes it from its own secrets, e.g.
       groq-api-key: ${{ secrets.GROQ_API_KEY }}. Never commit it.
     required: true
   model:
@@ -56,8 +60,10 @@ runs:
       shell: bash
       run: node dist/index.js "${{ inputs.run-id }}"
       env:
-        GITHUB_TOKEN: ${{ github.token }}
-        GITHUB_REPOSITORY: ${{ github.repository }}
+        # Runtime context is provided by the CALLER's step-level env —
+        # github.* and secrets.* are never readable inside a composite action.
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+        GITHUB_REPOSITORY: ${{ env.GITHUB_REPOSITORY }}
         GROQ_API_KEY: ${{ inputs.groq-api-key }}
         MODEL: ${{ inputs.model }}
         MAX_LOG_CHARS: ${{ inputs.max-log-chars }}

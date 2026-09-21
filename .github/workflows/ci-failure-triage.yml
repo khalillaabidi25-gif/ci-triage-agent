@@ -10,6 +10,11 @@
 #   - Important: the default GITHUB_TOKEN *cannot* comment on PRs coming
 #     from forks (trusted fork authors must use their own key). For this
 #     learning setup, PRs from same-repo branches work out of the box.
+#
+# Contexts live HERE, not in the action: this workflow is a normal
+# workflow where github.* and secrets.* are valid. The composite action
+# cannot read them, so we ship them in via `with:` (config) and `env:`
+# (runtime context) on the step that calls it.
 
 name: Triage Failed CI
 
@@ -35,3 +40,6 @@ jobs:
         with:
           run-id: ${{ github.event.workflow_run.id }}
           groq-api-key: ${{ secrets.GROQ_API_KEY }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
