@@ -1,6 +1,6 @@
-# DEMO pipeline — deliberately FAILS on purpose.
-# This is the workflow the triage agent watches (name must match
-# `workflows: ["CI"]` in ci-failure-triage.yml).
+# Demo pipeline for the triage agent (watched name: "CI").
+# Runs the coffee-shop demo-app unit tests. A real bug in the code makes
+# this pipeline fail — the triage agent summarizes the failure on the PR.
 name: CI
 
 on:
@@ -19,12 +19,10 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
+      - name: Install demo-app dependencies
+        working-directory: demo-app
         run: npm ci
 
-      - name: Run tests
-        run: npm test --if-present
-
-      - name: Deploy to staging
-        # Intended failure: this command does not exist on the runner.
-        run: ./deploy-staging.sh --env=staging
+      - name: Run demo-app unit tests
+        working-directory: demo-app
+        run: npm test
